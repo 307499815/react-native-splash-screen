@@ -3,6 +3,7 @@ package org.devio.rn.splashscreen;
 import android.app.Activity;
 import android.app.Dialog;
 import android.os.Build;
+import android.view.Window;
 
 import java.lang.ref.WeakReference;
 
@@ -31,6 +32,7 @@ public class SplashScreen {
                     mSplashDialog = new Dialog(activity, themeResId);
                     mSplashDialog.setContentView(R.layout.launch_screen);
                     mSplashDialog.setCancelable(false);
+                    syncSystemUi(activity, mSplashDialog);
 
                     if (!mSplashDialog.isShowing()) {
                         mSplashDialog.show();
@@ -38,6 +40,25 @@ public class SplashScreen {
                 }
             }
         });
+    }
+
+    /**
+     * A Dialog owns a separate Window and does not inherit the Activity's
+     * system UI layout flags. Keep both windows in the same coordinate system
+     * so a shared launch_screen layout does not move when the Dialog appears.
+     */
+    private static void syncSystemUi(Activity activity, Dialog dialog) {
+        Window activityWindow = activity.getWindow();
+        Window splashWindow = dialog.getWindow();
+        if (activityWindow == null || splashWindow == null) return;
+
+        splashWindow.getDecorView().setSystemUiVisibility(
+                activityWindow.getDecorView().getSystemUiVisibility());
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            splashWindow.setStatusBarColor(activityWindow.getStatusBarColor());
+            splashWindow.setNavigationBarColor(activityWindow.getNavigationBarColor());
+        }
     }
 
     /**
