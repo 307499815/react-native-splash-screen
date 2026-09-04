@@ -94,6 +94,22 @@ public class SplashScreen {
 
         final View target = splashView;
         target.setFitsSystemWindows(false);
+        final View bottomSpacer = dialog.findViewById(R.id.launch_bottom_safe_area);
+        if (bottomSpacer != null) {
+            ViewCompat.setOnApplyWindowInsetsListener(target, (view, insets) -> {
+                int navigationBarBottom = insets.getInsets(
+                        WindowInsetsCompat.Type.navigationBars()).bottom;
+                ViewGroup.LayoutParams layoutParams = bottomSpacer.getLayoutParams();
+                if (layoutParams != null && layoutParams.height != navigationBarBottom) {
+                    layoutParams.height = navigationBarBottom;
+                    bottomSpacer.setLayoutParams(layoutParams);
+                }
+                return insets;
+            });
+            return;
+        }
+
+        // Backward compatibility for host layouts that do not yet provide the dedicated spacer.
         final int left = target.getPaddingLeft();
         final int top = target.getPaddingTop();
         final int right = target.getPaddingRight();
