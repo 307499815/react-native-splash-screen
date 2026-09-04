@@ -68,6 +68,14 @@ public class SplashScreen {
             splashWindow.setStatusBarColor(activityWindow.getStatusBarColor());
             splashWindow.setNavigationBarColor(activityWindow.getNavigationBarColor());
         }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            splashWindow.setNavigationBarDividerColor(
+                    activityWindow.getNavigationBarDividerColor());
+        }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            splashWindow.setNavigationBarContrastEnforced(
+                    activityWindow.isNavigationBarContrastEnforced());
+        }
     }
 
     /**
