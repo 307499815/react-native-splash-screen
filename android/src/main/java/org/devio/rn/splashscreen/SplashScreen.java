@@ -3,7 +3,14 @@ package org.devio.rn.splashscreen;
 import android.app.Activity;
 import android.app.Dialog;
 import android.os.Build;
+import android.util.TypedValue;
+import android.view.View;
+import android.view.ViewGroup;
 import android.view.Window;
+
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowCompat;
+import androidx.core.view.WindowInsetsCompat;
 
 import java.lang.ref.WeakReference;
 
@@ -33,9 +40,11 @@ public class SplashScreen {
                     mSplashDialog.setContentView(R.layout.launch_screen);
                     mSplashDialog.setCancelable(false);
                     syncSystemUi(activity, mSplashDialog);
+                    applyEdgeToEdgeConfig(mSplashDialog);
 
                     if (!mSplashDialog.isShowing()) {
                         mSplashDialog.show();
+                        ViewCompat.requestApplyInsets(mSplashDialog.getWindow().getDecorView());
                     }
                 }
             }
@@ -59,6 +68,42 @@ public class SplashScreen {
             splashWindow.setStatusBarColor(activityWindow.getStatusBarColor());
             splashWindow.setNavigationBarColor(activityWindow.getNavigationBarColor());
         }
+    }
+
+    /**
+     * The Dialog has its own Window, so its edge-to-edge mode must be explicit. Apps that do not
+     * define splashScreenEdgeToEdge keep the legacy non-edge-to-edge behavior.
+     */
+    private static void applyEdgeToEdgeConfig(Dialog dialog) {
+        Window window = dialog.getWindow();
+        if (window == null) return;
+
+        TypedValue value = new TypedValue();
+        boolean edgeToEdge = dialog.getContext().getTheme().resolveAttribute(
+                R.attr.splashScreenEdgeToEdge, value, true) && value.data != 0;
+        if (!edgeToEdge) return;
+
+        WindowCompat.setDecorFitsSystemWindows(window, false);
+
+        View content = dialog.findViewById(android.R.id.content);
+        View splashView = content;
+        if (content instanceof ViewGroup && ((ViewGroup) content).getChildCount() > 0) {
+            splashView = ((ViewGroup) content).getChildAt(0);
+        }
+        if (splashView == null) return;
+
+        final View target = splashView;
+        target.setFitsSystemWindows(false);
+        final int left = target.getPaddingLeft();
+        final int top = target.getPaddingTop();
+        final int right = target.getPaddingRight();
+        final int bottom = target.getPaddingBottom();
+        ViewCompat.setOnApplyWindowInsetsListener(target, (view, insets) -> {
+            int navigationBarBottom = insets.getInsets(
+                    WindowInsetsCompat.Type.navigationBars()).bottom;
+            view.setPadding(left, top, right, bottom + navigationBarBottom);
+            return insets;
+        });
     }
 
     /**

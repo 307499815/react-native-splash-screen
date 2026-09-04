@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Explicitly opt the splash Dialog into the host app's edge-to-edge launch contract. -->
+    <attr name="splashScreenEdgeToEdge" format="boolean" />
+</resources>
